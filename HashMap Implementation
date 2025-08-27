@@ -1,0 +1,138 @@
+import java.util.ArrayList;
+
+public class hashMap{
+    static class HashMap<K,V>{
+        class Node{
+            K key;
+            V value;
+            Node next;
+            Node(K key,V value,Node next){
+                this.key = key;
+                this.value = value;
+                this.next = next;
+            }
+        }
+        ArrayList<Node> bucket = new ArrayList<>(); // inital capacity of arrList = 10 with size=0;
+        int sizeOfBucket = 0;
+
+        // to define size of arrayList
+        public HashMap(){
+            this(4);
+        }
+        public HashMap(int n){
+            for(int i=0;i<n;i++) bucket.add(null);
+        }
+
+        //to add the item in hmap
+        public void put(K key,V value){
+            int idx = hashFunction(key);
+            Node temp = bucket.get(idx); //giev head of linkedlist
+
+            //Linked List traversal...
+            while(temp != null){
+                if(temp.key.equals(key)){
+                    temp.value = value;
+                    return;
+                }
+                temp = temp.next;
+            }
+            Node newNode = new Node(key,value,null);
+            temp = bucket.get(idx);
+            //Node update the starting of this idx by craeting ll to start from this newNode by append head to it to head and creating
+            // newNode as head
+            newNode.next = temp;
+            bucket.set(idx,newNode);
+            sizeOfBucket++;
+            double thresholdfreq = 2.0;
+            double loadFactor = (1.0*sizeOfBucket)/bucket.size();
+            if(loadFactor > thresholdfreq){
+                reHashing();
+            }
+
+        }
+        private void reHashing() {
+            ArrayList<Node> newBucket = new ArrayList<>();
+            for(int i=0;i<2*bucket.size();i++) newBucket.add(null);
+            ArrayList<Node> remBucket = bucket;
+            bucket = newBucket;
+            sizeOfBucket = 0;
+            for(Node t : remBucket){
+                while(t!=null){
+                    put(t.key,t.value);
+                    t=t.next;
+                }
+            }
+
+        }
+        int hashFunction(K key){
+            int hCode = key.hashCode() % bucket.size(); //can be possible that hCode<0
+            if(hCode<0) hCode+=bucket.size();
+            return hCode;
+        }
+        public V get(K key){
+            int idx = hashFunction(key);
+            Node temp = bucket.get(idx);
+            while(temp!=null){
+                if(temp.key.equals(key)) return temp.value;
+                temp = temp.next;
+            }
+            return null;
+        }
+
+        public boolean contains(K key){
+            int idx = hashFunction(key);
+            Node temp = bucket.get(idx);
+            while(temp != null){
+                if(temp.key.equals(key)) return true;
+                temp = temp.next;
+            }
+            return false;
+        }
+
+        public V remove(K key){
+            int idx = hashFunction(key);
+            Node temp = bucket.get(idx);
+            Node prev = null;
+            while(temp != null){
+                if(temp.key.equals(key)){
+                    if(prev == null){     //head is asked to remove...
+                        prev = temp.next;
+                        temp.next = null;
+                        bucket.set(idx,prev);
+                        return temp.value;
+                    }
+                    prev.next = temp.next;
+                    temp.next = null;
+                    return temp.value;
+                }
+                prev = temp;
+                temp = temp.next;
+            }
+            return null;
+        }
+        public String toString(){
+            StringBuilder sb = new StringBuilder();
+            sb.append("{ ");
+            for(Node t : bucket){
+                while (t!=null) {
+                    sb.append(t.key+" : "+t.value+", ");
+                    t=t.next;
+                }
+            }
+            sb.delete(sb.length()-2,sb.length());
+            sb.append(" }");
+            return sb.toString();
+        }
+
+    }
+    public static void main(String[] args) {
+        HashMap<String,Integer> hmap = new HashMap<>();
+        hmap.put("R",24);
+        hmap.put("V",44);
+        hmap.put("k",44);
+        hmap.put("J",14);
+        hmap.put("k",74);
+        hmap.put("kl",74);
+        System.out.println(hmap);
+    }
+}
