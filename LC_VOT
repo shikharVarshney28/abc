@@ -1,0 +1,46 @@
+class Solution {
+    TreeMap<Integer, List<Pair>> tmap;
+
+    class Pair {
+        int row, col, val;
+
+        Pair(int val, int row, int col) {
+            this.val = val;
+            this.row = row;
+            this.col = col;
+        }
+    }
+
+    void find(TreeNode root, int row, int col) {
+        if (root == null)
+            return;
+        if (!tmap.containsKey(col))
+            tmap.put(col, new ArrayList<>());
+        tmap.get(col).add(new Pair(root.val, row, col));
+        find(root.left, row + 1, col - 1);
+        find(root.right, row + 1, col + 1);
+    }
+
+    public List<List<Integer>> verticalTraversal(TreeNode root) {
+        tmap = new TreeMap<>();
+        find(root, 0, 0);
+        List<List<Integer>> ans = new ArrayList<>();
+        // System.out.print(tmap);
+        for (int i : tmap.keySet()) {
+            List<Pair> l = tmap.get(i);
+            Collections.sort(l, new Comparator<Pair>() {
+                public int compare(Pair a, Pair b) {
+                    if (a.row == b.row && a.col == b.col)
+                        return a.val - b.val;
+                    return a.row - b.row;
+                }
+            });
+            List<Integer> l2 = new ArrayList<>();
+            for (Pair p : l) {
+                l2.add(p.val);
+            }
+            ans.add(new ArrayList<>(l2));
+        }
+        return ans;
+    }
+}
