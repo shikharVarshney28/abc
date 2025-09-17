@@ -1,0 +1,73 @@
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+public class infixConvertor{
+    static class TreeNode {
+        char ch ;
+        TreeNode left,right;
+        TreeNode(char ch, TreeNode left, TreeNode right){this.ch = ch;this.left = left;this.right = right;}
+    }
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String infix = "5*(6+5)/9";
+        String postfix = convertToPostFix(infix);
+        System.out.println(postfix);
+        
+        levelOrder(createTree(postfix));
+    }
+
+    private static void levelOrder(TreeNode root) {
+       Queue<TreeNode> qu = new LinkedList<>();
+       qu.add(root);
+       while(qu.size()>0){
+        TreeNode temp = qu.poll();
+        System.out.print(temp.ch);
+        if(temp.left!=null) qu.add(temp.left);
+        if(temp.right!=null) qu.add(temp.right);
+       }
+    }
+
+    private static TreeNode createTree(String postfix) {
+        Stack<TreeNode> st = new Stack<>();
+        for(char ch : postfix.toCharArray()){
+            if(ch>='0' && ch<='9') st.push(new TreeNode(ch,null,null));
+            else{
+                TreeNode right = st.pop() , left = st.pop();
+                TreeNode root = new TreeNode(ch,left,right);
+                st.push(root);
+            }
+        }
+        return st.pop();
+    }   
+    
+    private static String convertToPostFix(String infix) {
+        StringBuilder postfix = new StringBuilder();
+        Stack<Character> opr = new Stack<>(); 
+        for(char ch : infix.toCharArray()){
+            
+            if(ch>='0' && ch<='9') postfix.append(ch);
+            else if(ch == '(') opr.push(ch);
+            else if(ch == ')'){
+                while(opr.peek()!='('){
+                    postfix.append(opr.pop());
+                }
+                opr.pop(); // removed '('
+            }
+            else{
+                while(!opr.isEmpty() && getPriority(opr.peek())>=getPriority(ch)){
+                    postfix.append(opr.pop());
+                }
+                opr.push(ch);
+            }
+        }
+        while(!opr.isEmpty()){
+            postfix.append(opr.pop());
+        }
+        return postfix.toString();
+    }
+
+    private static int getPriority(Character peek) {
+        if(peek=='*' || peek == '/' ) return 2;
+        if(peek == '+' || peek == '-') return 1;
+        return -1;
+    }
+}
